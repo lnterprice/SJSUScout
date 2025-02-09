@@ -75,26 +75,22 @@ class SJSUScout:
         lane = self.getLane(lane)
         targetPuuid = self.puuids[lane]
         # list of championmain objects
-        championPool = []
+        self.championPoolObjects = []
         data = self.matchDict[lane]['unparsedMatchInfo']
         #pdb.set_trace()
         for object in data:
             for participant in object['info']['participants']:
                 if participant['puuid'] == targetPuuid:
-                    championPool.append(participant)
-        
-        self.championPoolObjects = []
-        for champion in championPool:
-            tempObj = ChampionMain(champion)
-            exists = False
-            for championPoolObj in self.championPoolObjects:
-                if tempObj == championPoolObj:
-                    championPoolObj.addStat(champion)
-                    exists = True
-                    break
-            if not exists:
-                self.championPoolObjects.append(tempObj)
-        
+                    tempObj = ChampionMain(participant)
+                    exists = False
+                    for championPoolObj in self.championPoolObjects:
+                        if tempObj == championPoolObj:
+                            championPoolObj.addStat(participant)
+                            exists = True
+                            break
+                    if not exists:
+                        self.championPoolObjects.append(tempObj)
+
         for champObj in self.championPoolObjects:
             print(champObj)
         
@@ -102,7 +98,7 @@ class SJSUScout:
 def main():
     scout = SJSUScout(True)
     scout.convertPuuid()
-    scout.getAllMatches("top", "15.3")
+    scout.getAllMatches("top", "15")
     scout.parseChampionPool("top")
 main()
 
