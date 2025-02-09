@@ -16,7 +16,7 @@ class SJSUScout:
                 username = username.split("#")
                 self.summonerTags.append(username)
         else:
-            self.summonerTags = [('Went', 'NA1'), ('Kevyi', 'NA1'), ('Evan', 'lai'), ('Sinvu', 'NA1'), ('stinky', 'joker')]
+            self.summonerTags = [('Interprice', 'NA1'), ('Kevyi', 'NA1'), ('Evan', 'lai'), ('Sinvu', 'NA1'), ('stinky', 'joker')]
 
 
     def convertPuuid(self):
@@ -52,10 +52,12 @@ class SJSUScout:
             url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{match}"
             response = json.loads(requests.get(url, headers=info['headers']).text)
             # base case is when the season version does not start with the target season
+            print(response['info']['gameVersion'])
             if not response['info']['gameVersion'].startswith(season):
                 return matchData
             # otherwise append to list
-            matchData.append(response)
+            if not response['info']['gameDuration'] <= 360:
+                matchData.append(response)
         # append lists from recursive method
         matchData += self.parseCurrentPatch(puuid, season, count + 100)
         # return the final list
@@ -75,6 +77,7 @@ class SJSUScout:
         # list of championmain objects
         championPool = []
         data = self.matchDict[lane]['unparsedMatchInfo']
+        #pdb.set_trace()
         for object in data:
             for participant in object['info']['participants']:
                 if participant['puuid'] == targetPuuid:
@@ -86,18 +89,21 @@ class SJSUScout:
             exists = False
             for championPoolObj in self.championPoolObjects:
                 if tempObj == championPoolObj:
-                    championPoolObj.addStat(tempObj)
+                    championPoolObj.addStat(champion)
                     exists = True
                     break
             if not exists:
                 self.championPoolObjects.append(tempObj)
         
-        pdb.set_trace()
+        for champObj in self.championPoolObjects:
+            print(champObj)
+        
         
 def main():
     scout = SJSUScout(True)
     scout.convertPuuid()
-    scout.getAllMatches("adc", "15.3")
+    scout.getAllMatches("top", "15")
+    scout.parseChampionPool("top")
 main()
 
 # response = url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{matches[-1]}"
@@ -115,13 +121,13 @@ main()
 # match['info']['participants'][num]['visionScore']
 # match['info']['participants'][num]['goldEarned']
 # match['info']['participants'][num]['gameEndedInSurrender']
-# match['info']['participants'][num]['win']
+# match['info']['participants'][num]['win'] done 
 # match['info']['participants'][num]['damageDealtToBuildings']
 # match['info']['participants'][num]['damageDealtToObjectives'] (participation in drag/baron is objectives-buildings)
 # match['info']['participants'][num]['championName']
-# match['info']['participants'][num]['kills']
-# match['info']['participants'][num]['deaths']
-# match['info']['participants'][num]['assists']
+# match['info']['participants'][num]['kills'] done
+# match['info']['participants'][num]['deaths'] done
+# match['info']['participants'][num]['assists'] done
 # match['info']['participants'][num]['longestTimeSpentLiving']
 # match['info']['participants'][num]['totalDamageDealtToChampions']
 # match['info']['participants'][num]['totalHealsOnTeammates']
@@ -133,3 +139,7 @@ main()
 # match['info']['participants'][num]['challenges']['goldPerMinute']
 # match['info']['participants'][num]['challenges']['maxCsAdvantageOnLaneOpponent']
 # match['info']['participants'][num]['challenges']['maxLevelLeadLaneOpponent']
+# match['info']['participants'][num]['firstBloodAssist']
+# match['info']['participants'][num]['firstBloodKill']
+# match['info']['participants'][num]['firstTowerAssist']
+# match['info']['participants'][num]['firstTowerKill']
