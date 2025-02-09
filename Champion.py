@@ -10,7 +10,6 @@ class ChampionMain:
             self.mastery = unparsedMatchData[0]['champExperience']
 
         elif type(unparsedMatchData) == dict:
-            #pdb.set_trace()
             self.championID = unparsedMatchData['championId']
             self.uData = [unparsedMatchData]
             self.info = {self.championID: {}}
@@ -38,7 +37,7 @@ class ChampionMain:
     def updateInfo(self):
         self.getAverageKDA()
         self.getAvgWinRate()
-        self.getAvgCS()
+        self.getAvgCSMin()
 
     # statistics cranker
 
@@ -46,7 +45,6 @@ class ChampionMain:
         kills = 0
         deaths = 0
         assists = 0
-        #pdb.set_trace()
         for stat in self.uData:
             kills += stat['kills']
             deaths += stat['deaths']
@@ -67,14 +65,12 @@ class ChampionMain:
             self.info[self.championID]['Winrate'] = 0
         return self.info[self.championID]['Winrate']
     
-    def getAvgCS(self):
-        totalCS = 0
+    def getAvgCSMin(self):
+        totalCSMin = 0
         for stat in self.uData:
-            totalCS += stat['totalMinionsKilled']
-        self.info[self.championID]['AvgCS'] = totalCS/len(self.uData)
+            totalCSMin += (stat['totalMinionsKilled']/(stat['challenges']['gameLength']/60))
+        self.info[self.championID]['AvgCS'] = totalCSMin/len(self.uData)
         return self.info[self.championID]['AvgCS']
-
-    
 
     def __eq__(self, championMainObj):
         return championMainObj.getChampionID() == self.getChampionID()
@@ -84,5 +80,5 @@ class ChampionMain:
         KDAStr = str(self.info[self.championID]['KDA'][0]) + " / " + str(self.info[self.championID]['KDA'][1]) + " / " + str(self.info[self.championID]['KDA'][2])
         WRStr = str(self.info[self.championID]['Winrate'] * 100)
         CSStr = str(self.info[self.championID]['AvgCS'])
-        string = f"Player {self.player} has KDA {KDAStr} with an average win rate of {WRStr} and average CSING per game {CSStr} on champion {self.championName} with a total amount of games at {len(self.uData )}"
+        string = f"Player {self.player} has KDA {KDAStr} with an average win rate of {WRStr} and average CS/Min per game {CSStr} on champion {self.championName} with a total amount of games at {len(self.uData )}"
         return string

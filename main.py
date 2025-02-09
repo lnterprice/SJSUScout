@@ -102,7 +102,7 @@ class SJSUScout:
 def main():
     scout = SJSUScout(True)
     scout.convertPuuid()
-    scout.getAllMatches("top", "15")
+    scout.getAllMatches("top", "15.3")
     scout.parseChampionPool("top")
 main()
 
@@ -143,3 +143,6 @@ main()
 # match['info']['participants'][num]['firstBloodKill']
 # match['info']['participants'][num]['firstTowerAssist']
 # match['info']['participants'][num]['firstTowerKill']
+# match['info']['participants'][num]['challenges']['skillshotsDodged']
+# match['info']['participants'][num]['challenges']['soloKills']
+# match['info']['participants'][num]['challenges']["gameLength"]
