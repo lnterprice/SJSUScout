@@ -37,7 +37,7 @@ class Summoner:
             if not response['info']['gameDuration'] <= 360:
                 matchData.append(response)
         # append lists from recursive method
-        matchData += self.parseCurrentPatch(self.puuid, season, count + 100)
+        matchData += self.parseCurrentPatch(season, count + 100)
         # return the final list
         return matchData
 

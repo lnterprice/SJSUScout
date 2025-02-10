@@ -33,7 +33,10 @@ class ChampionMain:
     def getDict(self):
         self.updateInfo()
         return self.info
-    
+
+    def getNumGames(self):
+        self.info[(self.championName, self.championID)]['numGames'] = len(self.uData)
+
     def updateInfo(self):
         self.getAverageKDA()
         self.getAvgWinRate()
@@ -44,6 +47,7 @@ class ChampionMain:
         self.getAvgAbilityUsage()
         self.getSkillShotsDodged()
         self.getAverageVisionScore()
+        self.getNumGames()
 
     # statistics cranker
 
@@ -66,18 +70,18 @@ class ChampionMain:
                 wins += 1
             totalGames += 1
         try:
-            self.info[(self.championName, self.championID)]['Winrate'] = wins/   totalGames
+            self.info[(self.championName, self.championID)]['winRate'] = wins/   totalGames
         except ZeroDivisionError:
-            self.info[(self.championName, self.championID)]['Winrate'] = 0
-        return self.info[(self.championName, self.championID)]['Winrate']
+            self.info[(self.championName, self.championID)]['winRate'] = 0
+        return self.info[(self.championName, self.championID)]['winRate']
     
 
     def getAvgCSMin(self):
         totalCSMin = 0
         for stat in self.uData:
             totalCSMin += (stat['totalMinionsKilled']/(stat['challenges']['gameLength']/60))
-        self.info[(self.championName, self.championID)]['AvgCS'] = totalCSMin/len(self.uData)
-        return self.info[(self.championName, self.championID)]['AvgCS']
+        self.info[(self.championName, self.championID)]['avgCS'] = totalCSMin/len(self.uData)
+        return self.info[(self.championName, self.championID)]['avgCS']
 
     def getGPM(self):
         totalGold = 0
@@ -97,29 +101,32 @@ class ChampionMain:
         totalDPM = 0
         for stat in self.uData:
             totalDPM += stat['challenges']['damagePerMinute']
-        self.info[(self.championName, self.championID)]['AvgDPM'] = totalDPM/len(self.uData)
-        return self.info[(self.championName, self.championID)]['AvgDPM']
+        self.info[(self.championName, self.championID)]['avgDPM'] = totalDPM/len(self.uData)
+        return self.info[(self.championName, self.championID)]['avgDPM']
     
     def getAvgAbilityUsage(self):
         totalAbilityUsage = 0
         for stat in self.uData:
             totalAbilityUsage += stat['challenges']['abilityUses']
-        self.info[(self.championName, self.championID)]['AvgAbUSage'] = totalAbilityUsage/len(self.uData)
-        return self.info[(self.championName, self.championID)]['AvgAbUSage']
+        self.info[(self.championName, self.championID)]['avgAbusage'] = totalAbilityUsage/len(self.uData)
+        return self.info[(self.championName, self.championID)]['avgAbusage']
     
     def getSkillShotsDodged(self):
         totalSkillShotsRatio = 0
         for stat in self.uData:
-            totalSkillShotsRatio += (stat['challenges']['skillshotsDodged']/(stat['challenges']['skillshotsDodged'] + stat['challenges']['skillshotsHit']))
-        self.info[(self.championName, self.championID)]['SkillShotRatio'] = totalSkillShotsRatio/len(self.uData)
-        return self.info[(self.championName, self.championID)]['SkillShotRatio']
+            try:
+                totalSkillShotsRatio += (stat['challenges']['skillshotsDodged']/(stat['challenges']['skillshotsDodged'] + stat['challenges']['skillshotsHit']))
+            except ZeroDivisionError:
+                pass
+        self.info[(self.championName, self.championID)]['dodgedSkillShots'] = totalSkillShotsRatio/len(self.uData)
+        return self.info[(self.championName, self.championID)]['dodgedSkillShots']
     
     def getAverageVisionScore(self):
         vScore = 0
         for stat in self.uData:
             vScore += stat['visionScore']
-        self.info[(self.championName, self.championID)]['VisionScore'] = vScore/len(self.uData)
-        return self.info[(self.championName, self.championID)]['VisionScore']
+        self.info[(self.championName, self.championID)]['visionScore'] = vScore/len(self.uData)
+        return self.info[(self.championName, self.championID)]['visionScore']
 
     def __eq__(self, championMainObj):
         return championMainObj.getChampionID() == self.getChampionID()
@@ -127,7 +134,7 @@ class ChampionMain:
     def __str__(self):
         self.updateInfo()
         KDAStr = str(self.info[(self.championName, self.championID)]['KDA'][0]) + " / " + str(self.info[(self.championName, self.championID)]['KDA'][1]) + " / " + str(self.info[(self.championName, self.championID)]['KDA'][2])
-        WRStr = str(self.info[(self.championName, self.championID)]['Winrate'] * 100)
-        CSStr = str(self.info[(self.championName, self.championID)]['AvgCS'])
+        WRStr = str(self.info[(self.championName, self.championID)]['winRate'] * 100)
+        CSStr = str(self.info[(self.championName, self.championID)]['avgCS'])
         string = f"Player {self.player} has KDA {KDAStr} with an average win rate of {WRStr} and average CS/Min per game {CSStr} on champion {self.championName} with a total amount of games at {len(self.uData)}"
         return string
