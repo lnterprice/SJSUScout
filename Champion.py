@@ -45,7 +45,6 @@ class ChampionMain:
         self.getAvgKP()
         self.getAvgDPM()
         self.getAvgAbilityUsage()
-        self.getSkillShotsDodged()
         self.getAverageVisionScore()
         self.getNumGames()
 
@@ -110,16 +109,6 @@ class ChampionMain:
             totalAbilityUsage += stat['challenges']['abilityUses']
         self.info[(self.championName, self.championID)]['avgAbusage'] = totalAbilityUsage/len(self.uData)
         return self.info[(self.championName, self.championID)]['avgAbusage']
-    
-    def getSkillShotsDodged(self):
-        totalSkillShotsRatio = 0
-        for stat in self.uData:
-            try:
-                totalSkillShotsRatio += (stat['challenges']['skillshotsDodged']/(stat['challenges']['skillshotsDodged'] + stat['challenges']['skillshotsHit']))
-            except ZeroDivisionError:
-                pass
-        self.info[(self.championName, self.championID)]['dodgedSkillShots'] = totalSkillShotsRatio/len(self.uData)
-        return self.info[(self.championName, self.championID)]['dodgedSkillShots']
     
     def getAverageVisionScore(self):
         vScore = 0
