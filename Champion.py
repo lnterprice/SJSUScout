@@ -58,8 +58,10 @@ class ChampionMain:
             kills += stat['kills']
             deaths += stat['deaths']
             assists += stat['assists']
-        self.info[(self.championName, self.championID)]['KDA'] = (kills/len(self.uData), deaths/len(self.uData), assists/len(self.uData))
-        return self.info[(self.championName, self.championID)]['KDA']
+        self.info[(self.championName, self.championID)]['Kills'] = kills/len(self.uData)
+        self.info[(self.championName, self.championID)]['Deaths'] = deaths/len(self.uData)
+        self.info[(self.championName, self.championID)]['Assists'] = assists/len(self.uData)
+        return (self.info[(self.championName, self.championID)]['Kills'], self.info[(self.championName, self.championID)]['Deaths'], self.info[(self.championName, self.championID)]['Assists'])
 
     def getAvgWinRate(self):
         totalGames = 0
@@ -122,7 +124,7 @@ class ChampionMain:
     
     def __str__(self):
         self.updateInfo()
-        KDAStr = str(self.info[(self.championName, self.championID)]['KDA'][0]) + " / " + str(self.info[(self.championName, self.championID)]['KDA'][1]) + " / " + str(self.info[(self.championName, self.championID)]['KDA'][2])
+        KDAStr = str(self.info[(self.championName, self.championID)]['Kills']) + " / " + str(self.info[(self.championName, self.championID)]['Deaths']) + " / " + str(self.info[(self.championName, self.championID)]['Assists'])
         WRStr = str(self.info[(self.championName, self.championID)]['winRate'] * 100)
         CSStr = str(self.info[(self.championName, self.championID)]['avgCS'])
         string = f"Player {self.player} has KDA {KDAStr} with an average win rate of {WRStr} and average CS/Min per game {CSStr} on champion {self.championName} with a total amount of games at {len(self.uData)}"

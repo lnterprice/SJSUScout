@@ -17,6 +17,61 @@ class Summoner:
         response = json.loads(response.text)['puuid']
         return response
 
+    # added 2/11/2025 for traversing previous seasons...
+
+    def frontTrack(self, season, start, count):
+        # base case if count is equal to zero
+        if count == 1:
+            return start
+        url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/by-puuid/{self.puuid}/ids?type=ranked&start={start}&count={count}"
+        matches = json.loads(requests.get(url, headers=info['headers']).text)
+        time.sleep(1.2)
+        url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{matches[-1]}"
+        response = json.loads(requests.get(url, headers=info['headers']).text)
+        time.sleep(1.2)
+        #pdb.set_trace()
+        print(response['info']['gameVersion'])
+        print(count)
+        print(start)
+        if response['info']['gameVersion'][0:len(season)] < season:
+            return self.frontTrack(season, start, int(count/2))
+        if response['info']['gameVersion'][0:len(season)] == season:
+            return self.frontTrack(season, start+int(count/2), count)
+
+    def backTrack(self, season, start):
+        # get match ids from start to start + count
+        # get match ids
+        url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/by-puuid/{self.puuid}/ids?type=ranked&start={start}&count=100"
+        matches = json.loads(requests.get(url, headers=info['headers']).text)
+        # traverse through match ids
+        time.sleep(1.2)
+        # binary search: get match info
+        url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{matches[-1]}"
+        response = json.loads(requests.get(url, headers=info['headers']).text)
+        time.sleep(1.2)
+        #print(response['info']['gameVersion'])
+        if response['info']['gameVersion'][0:len(season)] > season:
+            return self.backTrack(season, start+100)
+        #pdb.set_trace()
+        return self.frontTrack(season, start, 100)
+                
+        """
+        for match in matches:
+            time.sleep(1.2)
+            url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{match}"
+            response = json.loads(requests.get(url, headers=info['headers']).text)
+            print(response['info']['gameVersion'])
+            # response['info']['gameVersion'] gets game version
+            if response['info']['gameVersion'].startswith(season):
+                return count
+            count += 1
+        return self.getIdxCurrentPatch(season, count)
+        """
+
+    def getMatches(self, season):
+        count = self.backTrack(season, 0)
+        return self.parseCurrentPatch(season, count)
+
     def parseCurrentPatch(self, season, count):
         # get match ids from count to count + 100
         url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/by-puuid/{self.puuid}/ids?type=ranked&start={count}&count=100"
@@ -30,7 +85,8 @@ class Summoner:
             response = json.loads(requests.get(url, headers=info['headers']).text)
             # base case is when the season version does not start with the target season
             #pdb.set_trace()
-            print(response['info']['gameVersion'])
+            #print(response)
+            #print(response['info']['gameVersion'])
             if not response['info']['gameVersion'].startswith(season):
                 return matchData
             # otherwise append to list and filter remade games
@@ -43,8 +99,10 @@ class Summoner:
 
     # precondition that this will be run nearly on the same level as init
     def getAllMatches(self, season):
-        matches = self.parseCurrentPatch(season, 0)
+        # changed for testing 02/11/2025
+        matches = self.getMatches(season)
         self.matchDict['unparsedMatchInfo'] = matches
+        return season
 
     # parsing champion mains not acutlaly chapmion pool (untested as of 02/09/2025 03:00AM)
     def parseChampionPool(self):
@@ -67,6 +125,9 @@ class Summoner:
     
     def getCObjects(self):
         return self.championPoolObjects
+    
+    def getTag(self):
+        return (self.summonerTag[0] + "#" + self.summonerTag[1])
 
 # response = url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{matches[-1]}"
 # response = json.loads(requests.get(url, headers=info['headers']).text)
