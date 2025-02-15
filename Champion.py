@@ -81,8 +81,8 @@ class ChampionMain:
         totalCSMin = 0
         for stat in self.uData:
             totalCSMin += (stat['totalMinionsKilled']/(stat['challenges']['gameLength']/60))
-        self.info[(self.championName, self.championID)]['avgCS'] = totalCSMin/len(self.uData)
-        return self.info[(self.championName, self.championID)]['avgCS']
+        self.info[(self.championName, self.championID)]['avgCSPerMinute'] = totalCSMin/len(self.uData)
+        return self.info[(self.championName, self.championID)]['avgCSPerMinute']
 
     def getGPM(self):
         totalGold = 0
@@ -126,6 +126,6 @@ class ChampionMain:
         self.updateInfo()
         KDAStr = str(self.info[(self.championName, self.championID)]['Kills']) + " / " + str(self.info[(self.championName, self.championID)]['Deaths']) + " / " + str(self.info[(self.championName, self.championID)]['Assists'])
         WRStr = str(self.info[(self.championName, self.championID)]['winRate'] * 100)
-        CSStr = str(self.info[(self.championName, self.championID)]['avgCS'])
+        CSStr = str(self.info[(self.championName, self.championID)]['avgCSPerMinute'])
         string = f"Player {self.player} has KDA {KDAStr} with an average win rate of {WRStr} and average CS/Min per game {CSStr} on champion {self.championName} with a total amount of games at {len(self.uData)}"
         return string
