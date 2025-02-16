@@ -13,7 +13,7 @@ class Team:
         with open(f"excel/{self.teamName}.csv", 'w') as f:
             for i, df in enumerate(self.teamDFS):
                 f.write(f"{self.summoners[i][0]}#{self.summoners[i][1]}, Patch {self.patchNums[i]}\n")
-                df.to_csv(f, index=False)
+                df.to_csv(f, index=True)
                 f.write("\n\n\n")
         #pdb.set_trace()
         
