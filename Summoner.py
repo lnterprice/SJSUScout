@@ -21,42 +21,31 @@ class Summoner:
     def backTrack(self, season, start, count):
         # get match ids from start to start + count
         # get match ids
-        if count == 1:
+        if count == 0:
             return start
         time.sleep(1.2)
         url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/by-puuid/{self.puuid}/ids?type=ranked&start={start}&count={count}"
         matches = json.loads(requests.get(url, headers=info['headers']).text)
         # traverse through match ids
         # binary search: get match info
-        time.sleep(1.2)
-        url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{matches[-1]}"
-        response = json.loads(requests.get(url, headers=info['headers']).text)
-        print(response['info']['gameVersion'])
-        print(count)
-        print(start)
-        if response['info']['gameVersion'][0:len(season)] > season:
-            print("behind point")
-            return self.backTrack(season, start+count+1, count)
-        #pdb.set_trace()
-        print("ahead point")
-        return self.backTrack(season, start, int(count/2))
-                
-        """
-        for match in matches:
+        if matches:
             time.sleep(1.2)
-            url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{match}"
+            url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{matches[-1]}"
             response = json.loads(requests.get(url, headers=info['headers']).text)
             print(response['info']['gameVersion'])
-            # response['info']['gameVersion'] gets game version
-            if response['info']['gameVersion'].startswith(season):
-                return count
-            count += 1
-        return self.getIdxCurrentPatch(season, count)
-        """
+            print(count)
+            print(start)
+            if response['info']['gameVersion'][:len(season)] > season:
+                print("behind point")
+                return self.backTrack(season, start+count+1, count)
+            #pdb.set_trace()
+            print("ahead point")
+            return self.backTrack(season, start, int(count/2))
+        raise RuntimeError(f"User {self.summonerTag[0]}#{self.summonerTag[1]} does not have any games at all, possibly a smurf.")
 
-    def getMatches(self, season):
+    def getMatches(self, season, endseason):
         count = self.backTrack(season, 0, 100)
-        return self.parseCurrentPatch(season, count)
+        return self.parseCurrentPatch(endseason, count)
 
     def parseCurrentPatch(self, season, count):
         # get match ids from count to count + 100
@@ -66,6 +55,8 @@ class Summoner:
         # for each match id, add to a list
         matchData = []
         #pdb.set_trace()
+        if not matches:
+            return matchData
         for match in matches:
             time.sleep(1.2)
             url = f"https://{info['REGIONV1']}.api.riotgames.com/lol/match/v5/matches/{match}"
@@ -73,8 +64,8 @@ class Summoner:
             # base case is when the season version does not start with the target season
             #pdb.set_trace()
             #print(response)
-            #print(response['info']['gameVersion'])
-            if not response['info']['gameVersion'].startswith(season):
+            print(response['info']['gameVersion'])
+            if response['info']['gameVersion'][:len(season)] < season:
                 return matchData
             # otherwise append to list and filter remade games
             if not response['info']['gameDuration'] <= 360:
@@ -85,9 +76,9 @@ class Summoner:
         return matchData
 
     # precondition that this will be run nearly on the same level as init
-    def getAllMatches(self, season):
+    def getAllMatches(self, season, endseason):
         # changed for testing 02/11/2025
-        matches = self.getMatches(season)
+        matches = self.getMatches(season, endseason)
         self.matchDict['unparsedMatchInfo'] = matches
         return season
 

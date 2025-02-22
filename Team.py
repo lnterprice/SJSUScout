@@ -12,7 +12,7 @@ class Team:
     def toCSV(self):
         with open(f"excel/{self.teamName}.csv", 'w') as f:
             for i, df in enumerate(self.teamDFS):
-                f.write(f"{self.summoners[i][0]}#{self.summoners[i][1]}, Patch {self.patchNums[i]}\n")
+                f.write(f"{self.summoners[i]}, Patch {self.patchNums[i]}\n")
                 df.to_csv(f, index=True)
                 f.write("\n\n\n")
         #pdb.set_trace()
@@ -22,26 +22,25 @@ class Team:
         self.summoners = []
         self.patchNums = []
         self.teamDFS = []
-        for i in range(0, 5):
-            summonerTag = input("Enter Summoner Tag (Example#NA1): ")
-            summonerTag = (summonerTag.split("#")[0], summonerTag.split("#")[1])
-            self.summoners.append(summonerTag)
-            patchNum = input("Enter Patch Num that you want to get the match history of (Ex: 15.3, 15.2, 14.23): ")
-            self.patchNums.append(patchNum)
-        
-        for i in range(0, 5):
-            summoner = Summoner(self.summoners[i][0], self.summoners[i][1])
-            summoner.getAllMatches(self.patchNums[i])
-            summoner.parseChampionPool()
-            #pdb.set_trace()
-            while not summoner.getCObjects():
-                patch = input(f"[-] {summoner.getTag()} does not have match in that patch, choose another patch: ")
-                self.patchNums[i] = patch
-                summoner.getAllMatches(self.patchNums[i])
-                summoner.parseChampionPool()
-            self.teamDFS.append(self.toDF(summoner.getCObjects()))
 
-        
+        with open("Summoners.txt", "r") as file:
+            for i, line in enumerate(file):
+                line = line.rstrip("\n")
+                summonerTag = line.split(",")[0]
+                beginningPatch, endingPatch = line.split(",")[1].split("-")
+                self.summoners.append(summonerTag)
+                self.patchNums.append(f"{beginningPatch}-{endingPatch}")
+                #pdb.set_trace()
+                summoner = Summoner(summonerTag.split("#")[0], summonerTag.split("#")[1])
+                summoner.getAllMatches(beginningPatch, endingPatch)
+                summoner.parseChampionPool()
+                while not summoner.getCObjects():
+                    patch = input(f"[-] {summoner.getTag()} does not have match in that patch of {beginningPatch}-{endingPatch}, choose another patch in format (laterpatch-newpatch): ")
+                    beginningPatch, endingPatch = patch.split("-")
+                    self.patchNums[i] = f"{beginningPatch}-{endingPatch}"
+                    summoner.getAllMatches(beginningPatch, endingPatch)
+                    summoner.parseChampionPool()
+                self.teamDFS.append(self.toDF(summoner.getCObjects()))
 
     def toDF(self, championObj):
         championList = {}

@@ -1,7 +1,7 @@
 from Team import Team
 
 def main():
-    team = Team("UT Tyler-LoL")
+    team = Team("Rowan Gold")
     team.toCSV()
 
 if __name__ == '__main__':
